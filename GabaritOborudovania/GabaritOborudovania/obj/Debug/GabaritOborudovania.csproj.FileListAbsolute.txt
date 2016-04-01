@@ -1,0 +1,6 @@
+E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\bin\Debug\GabaritOborudovania.dll
+E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\bin\Debug\GabaritOborudovania.pdb
+E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Debug\GabaritOborudovania.csproj.GenerateResource.Cache
+E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Debug\GabaritOborudovania.dll
+E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Debug\GabaritOborudovania.pdb
+E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Debug\GabaritOborudovania.MyCommands.resources

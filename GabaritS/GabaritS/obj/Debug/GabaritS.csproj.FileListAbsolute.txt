@@ -1,0 +1,7 @@
+E:\Занятия\Автокад\GabaritS\GabaritS\bin\Debug\GabaritS.dll
+E:\Занятия\Автокад\GabaritS\GabaritS\bin\Debug\GabaritS.pdb
+E:\Занятия\Автокад\GabaritS\GabaritS\obj\Debug\GabaritS.MyCommands.resources
+E:\Занятия\Автокад\GabaritS\GabaritS\obj\Debug\GabaritS.csproj.GenerateResource.Cache
+E:\Занятия\Автокад\GabaritS\GabaritS\obj\Debug\GabaritS.dll
+E:\Занятия\Автокад\GabaritS\GabaritS\obj\Debug\GabaritS.pdb
+E:\Занятия\Автокад\GabaritS\GabaritS\obj\Debug\GabaritS.csprojResolveAssemblyReference.cache
