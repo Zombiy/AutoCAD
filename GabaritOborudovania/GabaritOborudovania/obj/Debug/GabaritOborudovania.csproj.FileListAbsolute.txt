@@ -4,3 +4,4 @@ E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Deb
 E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Debug\GabaritOborudovania.dll
 E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Debug\GabaritOborudovania.pdb
 E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Debug\GabaritOborudovania.MyCommands.resources
+E:\Занятия\Автокад\GabaritOborudovania\GabaritOborudovania\obj\Debug\GabaritOborudovania.csprojResolveAssemblyReference.cache

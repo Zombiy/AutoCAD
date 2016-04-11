@@ -18,7 +18,7 @@ namespace GabaritOborudovania
     public class MyCommands
     {
 
-        [CommandMethod("MyGroup", "MyGabaritOborudovania", "MyGabaritOborudovania", CommandFlags.Modal)]
+        [CommandMethod("MyGroup", "GabaritOborudovania", "GabaritOborudovania", CommandFlags.Modal)]
         public void MyGabaritO()
         {
            

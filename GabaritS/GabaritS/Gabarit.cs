@@ -13,10 +13,15 @@ namespace GabaritS
         public double L { get; set; }
         public double H { get; set; }
         public bool KRPrav { get; set; }
+        public bool KrivPrav { get; set; }
        
         public Gabarit(StartParametrs st)
         {
-            R = st.pRadRes.Value; L = st.polyLength; H = st.pHeightRes.Value; KRPrav = st.KRPrav; 
+            R = st.pRadRes.Value; 
+            L = st.polyLength; 
+            H = st.pHeightRes.Value; 
+            KRPrav = st.KRPrav;
+            KrivPrav = st.KrivPrav;
         }
         public List<Point2d> GetListOfPoint()
         {
@@ -34,8 +39,8 @@ namespace GabaritS
             }
             else { return null; }
 
-            double gabIn = KRPrav ? 2200 : 1900;
-            double gabOut = KRPrav ? 1900 : 2200;
+            double gabIn = KRPrav ? 1900 : 2200;
+            double gabOut = KRPrav ? 2200 : 1900;
 
             for (int i = 0; i < 5; i++)
             {
@@ -57,7 +62,9 @@ namespace GabaritS
             }
             for (int i = 0; i <= dlinaOtvoda+5; i++)
             {
-                ListOfPoint.Add(new Point2d(ValueIN[i], ValueOUT[i]));
+                Point2d pointKrivPr = KrivPrav ? new Point2d(ValueOUT[i], ValueIN[i]) : new Point2d(ValueIN[i], ValueOUT[i]); 
+               
+                ListOfPoint.Add(pointKrivPr);
             }
             
             return ListOfPoint;

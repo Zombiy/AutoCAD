@@ -25,16 +25,16 @@ namespace GabaritS
             Database acCurDb = acDoc.Database;
             Editor ed = acDoc.Editor;
             #region Проверка даты
-            //if (DateTime.Now > (new DateTime(2017, 01, 01)))
-            //{
-            //    ed.WriteMessage("\nВремя действия программы истекло, для продолжения, свяжитесь с создателем :)");
-            //    return;
-            //}
+            if (DateTime.Now > (new DateTime(2017, 01, 01)))
+            {
+                ed.WriteMessage("\nВремя действия программы истекло, для продолжения, свяжитесь с создателем :)");
+                return;
+            }
             #endregion
 
             StartParametrs startParametrs = new StartParametrs(acDoc, ed);
             if (startParametrs.IsCancel) return;
-
+            const string blockName = "BlockPointOfGabarit";
 
             Point3dCollection listOfINgab = new Point3dCollection();
             Point3dCollection listOfOutgab = new Point3dCollection();
@@ -44,16 +44,51 @@ namespace GabaritS
             {
                 BlockTable acBlkTbl;
                 BlockTableRecord acBlkTblRec;
+                LayerTable acLyrTbl = transaction.GetObject(acCurDb.LayerTableId, OpenMode.ForWrite) as LayerTable;
+
                 acBlkTbl = transaction.GetObject(acCurDb.BlockTableId,
                                              OpenMode.ForRead) as BlockTable;
 
                 acBlkTblRec = transaction.GetObject(acBlkTbl[BlockTableRecord.ModelSpace],
                                                 OpenMode.ForWrite) as BlockTableRecord;
 
+                BlockTable bt = (BlockTable)transaction.GetObject(acCurDb.BlockTableId, OpenMode.ForWrite);
+                ObjectId btrId;
+                if (!bt.Has(blockName))
+                {
+                    if (acLyrTbl.Has("ГТ_Значения_Габаритов"))
+                        acCurDb.Clayer = acLyrTbl["ГТ_Значения_Габаритов"];
+                    // создаем новое определение блока, задаем ему имя
+                    BlockTableRecord btr = new BlockTableRecord();
+                    btr.Name = blockName;
+
+                    // добавляем созданное определение блока в таблицу блоков и в транзакцию,
+                    // запоминаем ID созданного определения блока (оно пригодится чуть позже)
+                    btrId = bt.Add(btr);
+                    transaction.AddNewlyCreatedDBObject(btr, true);
+
+                    // создаем окружность
+                    Circle cir = new Circle();
+                    cir.SetDatabaseDefaults();
+                    cir.Center = new Point3d(0, 0, 0);
+                    cir.Radius = 0.1;
+
+                    // добавляем окружность в определение блока и в транзакцию
+                    btr.AppendEntity(cir);
+                    transaction.AddNewlyCreatedDBObject(cir, true);
+                }
+                else
+                {
+                    btrId = bt[blockName];
+                }
+
+
+
+                #region чертим габарит
+
                 using (Curve curve = (Curve)transaction.GetObject(startParametrs.selPolyRes.ObjectId, OpenMode.ForWrite))
                 {
-                  
-                    
+
 
                     startParametrs.polyLength = ((Polyline2d)curve).Length;
                     Gabarit gab = new Gabarit(startParametrs);
@@ -61,24 +96,21 @@ namespace GabaritS
 
                     StartVector = curve.GetFirstDerivative(curve.StartPoint);
                     EndVector = curve.GetFirstDerivative(curve.EndPoint);
-                    Point3d pointStart = curve.StartPoint - StartVector * 10;
+
+                    Point3d pointStart = curve.StartPoint - StartVector / StartVector.Length * 10;
                     Polyline2d poly = (Polyline2d)curve;
-                    
+
                     using (Polyline acPoly = new Polyline())
                     {
                         int j = 0;
-                        acPoly.AddVertexAt(j++, new Point2d(pointStart.X,pointStart.Y), 0, 0, 0);
+                        acPoly.AddVertexAt(j++, new Point2d(pointStart.X, pointStart.Y), 0, 0, 0);
                         for (int i = 0; i <= startParametrs.polyLength; i++)
                         {
-                            Point2d PointOnCurve = new Point2d(poly.GetPointAtDist(i).X,poly.GetPointAtDist(i).Y);
+                            Point2d PointOnCurve = new Point2d(poly.GetPointAtDist(i).X, poly.GetPointAtDist(i).Y);
                             acPoly.AddVertexAt(j++, PointOnCurve, 0, 0, 0);
                         }
-                       
+
                         acPoly.AddVertexAt(j++, new Point2d(poly.EndPoint.X, poly.EndPoint.Y), 0, 0, 0);
-                        //acPoly.Length
-                     
-                     //   acPoly.TransformBy(ucs);
-                        // Add the new object to the block table record and the transaction
                         //acBlkTblRec.AppendEntity(acPoly);
                         //transaction.AddNewlyCreatedDBObject(acPoly, true);
 
@@ -92,7 +124,39 @@ namespace GabaritS
 
                             listOfINgab.Add(startPoint);
                             listOfOutgab.Add(endPoint);
+                            if (i % 5 == 0)
+                            {
+                                if (acLyrTbl.Has("ГТ_Значения_Габаритов"))
+                                    acCurDb.Clayer = acLyrTbl["ГТ_Значения_Габаритов"];
+                                BlockReference br = new BlockReference(acPoly.GetPointAtDist(i), btrId);
+                                acBlkTblRec.AppendEntity(br);
+                                transaction.AddNewlyCreatedDBObject(br, true);
+                                Line line = new Line(startPoint, endPoint);
+                               // perpendicularVector.GetAngleTo(Vector3d.XAxis);
+                                DBText textY = new DBText();
+                                textY.Height = 0.6;
+
+                                textY.Rotation = startParametrs.TextPrav ? line.Angle + Math.PI : line.Angle;
+                                textY.Position = startParametrs.TextPrav ? acPoly.GetPointAtDist(i) - perpendicularVector * 1.9 : acPoly.GetPointAtDist(i) - perpendicularVector * 0.2;
+                                textY.TextString = Add00Totext(listOfPointGab[i].Y.ToString());
+                                acBlkTblRec.AppendEntity(textY);
+                                transaction.AddNewlyCreatedDBObject(textY, true);
+
+                                DBText textX = new DBText();
+                                textX.Height = 0.6;
+                                textX.Rotation = startParametrs.TextPrav ? line.Angle + Math.PI : line.Angle;
+                                textX.Position = startParametrs.TextPrav ? acPoly.GetPointAtDist(i) + perpendicularVector * 0.2 : acPoly.GetPointAtDist(i) + perpendicularVector * 1.9;
+                                
+                                textX.TextString = Add00Totext(listOfPointGab[i].X.ToString());
+                                acBlkTblRec.AppendEntity(textX);
+                                transaction.AddNewlyCreatedDBObject(textX, true);
+
+                                if (acLyrTbl.Has("ГТ_Габарит"))
+                                    acCurDb.Clayer = acLyrTbl["ГТ_Габарит"];
+                            }
+
                         }
+
                         if (acPoly.Length < Math.Round(acPoly.Length))
                         {
                             Vector3d tangentVector = acPoly.GetFirstDerivative(acPoly.EndPoint);
@@ -103,23 +167,37 @@ namespace GabaritS
 
                             listOfINgab.Add(startPoint);
                             listOfOutgab.Add(endPoint);
+
+                            if (acLyrTbl.Has("ГТ_Значения_Габаритов"))
+                                acCurDb.Clayer = acLyrTbl["ГТ_Значения_Габаритов"];
+                            BlockReference br = new BlockReference(acPoly.EndPoint, btrId);
+                            acBlkTblRec.AppendEntity(br);
+                            transaction.AddNewlyCreatedDBObject(br, true);
+                            Line line = new Line(startPoint, endPoint);
+
+                            DBText textY = new DBText();
+                            textY.Height = 0.6;
+                            textY.Rotation = startParametrs.TextPrav ? line.Angle + Math.PI : line.Angle;
+                            textY.Position = startParametrs.TextPrav ? acPoly.EndPoint - perpendicularVector * 1.9 : acPoly.EndPoint - perpendicularVector * 0.2;
+                            textY.TextString = Add00Totext(listOfPointGab[listOfPointGab.Count - 1].Y.ToString());
+                            acBlkTblRec.AppendEntity(textY);
+                            transaction.AddNewlyCreatedDBObject(textY, true);
+
+                            DBText textX = new DBText();
+                            textX.Height = 0.6;
+                            textX.Rotation = startParametrs.TextPrav ? line.Angle + Math.PI : line.Angle;
+                            textX.Position = startParametrs.TextPrav ? acPoly.EndPoint + perpendicularVector * 0.2 : acPoly.EndPoint + perpendicularVector * 1.9;
+                            textX.TextString = Add00Totext(listOfPointGab[listOfPointGab.Count - 1].X.ToString());
+                            acBlkTblRec.AppendEntity(textX);
+                            transaction.AddNewlyCreatedDBObject(textX, true);
+
+                            if (acLyrTbl.Has("ГТ_Габарит"))
+                                acCurDb.Clayer = acLyrTbl["ГТ_Габарит"];
+
                         }
-                        
-
                     }
-                   
-                
-
                 }
-                //using (Polyline acPoly = new Polyline())
-                //{
-                //    for (int i = 0; i <= startParametrs.polyLength; i++)
-                //    {
-                //        Point2d PointOnCurve = new Point2d(poly.GetPointAtDist(i).X, poly.GetPointAtDist(i).Y);
-                //        acPoly.AddVertexAt(j++, PointOnCurve, 0, 0, 0);
-                //    }
-                //}
-
+                #endregion
 
                 Spline acSplineIn = new Spline(listOfINgab, StartVector, EndVector, 4, 0.0);
                 acSplineIn.SetDatabaseDefaults();
@@ -131,39 +209,18 @@ namespace GabaritS
                 acBlkTblRec.AppendEntity(acSplineOut);
                 transaction.AddNewlyCreatedDBObject(acSplineOut, true);
 
-
                 transaction.Commit();
             }
 
             Application.DocumentManager.MdiActiveDocument.Editor.UpdateScreen();
-
-            //GetParameterAtDistance()
         }
 
-    
-
-        //private static CoordinatesOfPointsGabarit GetPointOfGab(Database acCurDb, Polyline poly, Point2d CurrPoint, Point3d pointOnCurve)
-        //{
-        //    CoordinatesOfPointsGabarit Coord;
-        //    using (Transaction transaction = acCurDb.TransactionManager.StartTransaction())
-        //    {
-        //        using (Curve curve = (Curve)transaction.GetObject(poly.ObjectId, OpenMode.ForRead))
-        //        {
-
-        //            Vector3d tangentVector = curve.GetFirstDerivative(pointOnCurve);
-        //            Vector3d perpendicularVector = tangentVector.GetPerpendicularVector();
-        //            perpendicularVector = perpendicularVector.GetNormal();
-        //            Point3d startPoint = pointOnCurve + perpendicularVector * CurrPoint.X;
-        //            Point3d endPoint = pointOnCurve - perpendicularVector * CurrPoint.Y;
-        //            Coord = new CoordinatesOfPointsGabarit(startPoint, endPoint);
-        //        }
-
-        //        transaction.Commit();
-        //    }
-        //    return Coord;
-        //}
-
-
+        private static string Add00Totext(string textValue)
+        {
+            while (textValue.Length < 5)
+                textValue += "0";
+            return textValue;
+        }
     }
 
 

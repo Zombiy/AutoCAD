@@ -20,6 +20,7 @@ namespace GabaritS
         public PromptEntityResult selPolyRes { get; set; }
         public bool KRPrav { get; set; }
         public bool KrivPrav { get; set; }
+        public bool TextPrav { get; set; }
         public StartParametrs(Document acDoc, Editor ed)
         {
             do
@@ -29,21 +30,33 @@ namespace GabaritS
                 if (selPolyRes.Status == PromptStatus.Cancel) { IsCancel = true; return; };
             } while (!PolylineToPolyline2d(selPolyRes));
            
-            // PromptPointOptions pPtOpts = new PromptPointOptions("");
-            // pPtOpts.Message = "\nТочка вставки габарита: ";
-            //  pPtRes = acDoc.Editor.GetPoint(pPtOpts);
-            //Point2d ptStart = new Point2d(pPtRes.Value.X, pPtRes.Value.Y);
-            //if (pPtRes.Status == PromptStatus.Cancel) { IsCancel = true; return; };
+            
             if (!PolylineToPolyline2d(selPolyRes)) { IsCancel = true; return; };// если это не полилиния - выходим, есил это полилиния конвертируем в полилинию 2d
+
+            PromptKeywordOptions pPravOptions = new PromptKeywordOptions("");
+            pPravOptions.Message = "\nКонтактный рельс справа или слева? ";
+            pPravOptions.Keywords.Add("П");
+            pPravOptions.Keywords.Add("Л");
+            PromptResult pPrav = acDoc.Editor.GetKeywords(pPravOptions);
+            KRPrav = (pPrav.StringResult == "П") ? true : false;
+
+            pPravOptions.Message = "\nКривая право или лево? ";
+            pPrav = acDoc.Editor.GetKeywords(pPravOptions);
+            KrivPrav = (pPrav.StringResult == "П") ? true : false;
+
+            pPravOptions.Keywords.Clear();
+            pPravOptions.Keywords.Add("X");
+            pPravOptions.Keywords.Add("П");
+            pPravOptions.Message = "\nНаправление текста по ходу или против? ";
+            pPrav = acDoc.Editor.GetKeywords(pPravOptions);
+            TextPrav = (pPrav.StringResult == "П") ? true : false;
             
-            
-            
+
             pRadRes = GetDoubleFromMenu(acDoc, "\n Введите радиус от 0 до 5000: ", 5000);
             if (pRadRes.Status == PromptStatus.Cancel) { IsCancel = true; return; };
             pHeightRes = GetDoubleFromMenu(acDoc, "\n Введите возвышение (от 0 до 0.150) : ", 0.150);
             if (pHeightRes.Status == PromptStatus.Cancel) { IsCancel = true; return; };
-            KRPrav = true;
-            KrivPrav = true;
+           
 
         }
 
