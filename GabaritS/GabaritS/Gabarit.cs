@@ -39,8 +39,19 @@ namespace GabaritS
             }
             else { return null; }
 
-            double gabIn = KRPrav ? 1900 : 2200;
-            double gabOut = KRPrav ? 2200 : 1900;
+            double gabIn;
+            double gabOut;
+
+            if (KrivPrav)
+            {
+                gabIn = KRPrav ? 1900 : 2200;
+                gabOut = KRPrav ? 2200 : 1900;
+            }
+            else
+            {
+                gabIn = KRPrav ? 2200 : 1900;
+                gabOut = KRPrav ? 1900 : 2200;
+            }
 
             for (int i = 0; i < 5; i++)
             {

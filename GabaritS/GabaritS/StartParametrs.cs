@@ -49,7 +49,7 @@ namespace GabaritS
             pPravOptions.Keywords.Add("П");
             pPravOptions.Message = "\nНаправление текста по ходу или против? ";
             pPrav = acDoc.Editor.GetKeywords(pPravOptions);
-            TextPrav = (pPrav.StringResult == "П") ? true : false;
+            TextPrav = (pPrav.StringResult == "П") ? false : true;
             
 
             pRadRes = GetDoubleFromMenu(acDoc, "\n Введите радиус от 0 до 5000: ", 5000);

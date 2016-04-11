@@ -124,6 +124,7 @@ namespace GabaritS
 
                             listOfINgab.Add(startPoint);
                             listOfOutgab.Add(endPoint);
+
                             if (i % 5 == 0)
                             {
                                 if (acLyrTbl.Has("ГТ_Значения_Габаритов"))
@@ -131,21 +132,21 @@ namespace GabaritS
                                 BlockReference br = new BlockReference(acPoly.GetPointAtDist(i), btrId);
                                 acBlkTblRec.AppendEntity(br);
                                 transaction.AddNewlyCreatedDBObject(br, true);
-                                Line line = new Line(startPoint, endPoint);
-                               // perpendicularVector.GetAngleTo(Vector3d.XAxis);
+                                double ang = Vector3d.XAxis.GetAngleTo(perpendicularVector, Vector3d.ZAxis);
+
                                 DBText textY = new DBText();
                                 textY.Height = 0.6;
 
-                                textY.Rotation = startParametrs.TextPrav ? line.Angle + Math.PI : line.Angle;
-                                textY.Position = startParametrs.TextPrav ? acPoly.GetPointAtDist(i) - perpendicularVector * 1.9 : acPoly.GetPointAtDist(i) - perpendicularVector * 0.2;
+                                textY.Rotation = startParametrs.TextPrav ? ang + Math.PI : ang;
+                                textY.Position = startParametrs.TextPrav ? acPoly.GetPointAtDist(i) - perpendicularVector * 0.2 : acPoly.GetPointAtDist(i) - perpendicularVector * 2;
                                 textY.TextString = Add00Totext(listOfPointGab[i].Y.ToString());
                                 acBlkTblRec.AppendEntity(textY);
                                 transaction.AddNewlyCreatedDBObject(textY, true);
 
                                 DBText textX = new DBText();
                                 textX.Height = 0.6;
-                                textX.Rotation = startParametrs.TextPrav ? line.Angle + Math.PI : line.Angle;
-                                textX.Position = startParametrs.TextPrav ? acPoly.GetPointAtDist(i) + perpendicularVector * 0.2 : acPoly.GetPointAtDist(i) + perpendicularVector * 1.9;
+                                textX.Rotation = startParametrs.TextPrav ? ang + Math.PI : ang;
+                                textX.Position = startParametrs.TextPrav ? acPoly.GetPointAtDist(i) + perpendicularVector * 2 : acPoly.GetPointAtDist(i) + perpendicularVector * 0.2;
                                 
                                 textX.TextString = Add00Totext(listOfPointGab[i].X.ToString());
                                 acBlkTblRec.AppendEntity(textX);
@@ -168,25 +169,26 @@ namespace GabaritS
                             listOfINgab.Add(startPoint);
                             listOfOutgab.Add(endPoint);
 
+                            double ang = Vector3d.XAxis.GetAngleTo(perpendicularVector, Vector3d.ZAxis);
                             if (acLyrTbl.Has("ГТ_Значения_Габаритов"))
                                 acCurDb.Clayer = acLyrTbl["ГТ_Значения_Габаритов"];
                             BlockReference br = new BlockReference(acPoly.EndPoint, btrId);
                             acBlkTblRec.AppendEntity(br);
                             transaction.AddNewlyCreatedDBObject(br, true);
-                            Line line = new Line(startPoint, endPoint);
+                          
 
                             DBText textY = new DBText();
                             textY.Height = 0.6;
-                            textY.Rotation = startParametrs.TextPrav ? line.Angle + Math.PI : line.Angle;
-                            textY.Position = startParametrs.TextPrav ? acPoly.EndPoint - perpendicularVector * 1.9 : acPoly.EndPoint - perpendicularVector * 0.2;
+                            textY.Rotation = startParametrs.TextPrav ? ang + Math.PI : ang;
+                            textY.Position = startParametrs.TextPrav ? acPoly.EndPoint - perpendicularVector * 0.2 : acPoly.EndPoint - perpendicularVector * 2;
                             textY.TextString = Add00Totext(listOfPointGab[listOfPointGab.Count - 1].Y.ToString());
                             acBlkTblRec.AppendEntity(textY);
                             transaction.AddNewlyCreatedDBObject(textY, true);
 
                             DBText textX = new DBText();
                             textX.Height = 0.6;
-                            textX.Rotation = startParametrs.TextPrav ? line.Angle + Math.PI : line.Angle;
-                            textX.Position = startParametrs.TextPrav ? acPoly.EndPoint + perpendicularVector * 0.2 : acPoly.EndPoint + perpendicularVector * 1.9;
+                            textX.Rotation = startParametrs.TextPrav ? ang + Math.PI : ang;
+                            textX.Position = startParametrs.TextPrav ? acPoly.EndPoint + perpendicularVector * 2 : acPoly.EndPoint + perpendicularVector * 0.2;
                             textX.TextString = Add00Totext(listOfPointGab[listOfPointGab.Count - 1].X.ToString());
                             acBlkTblRec.AppendEntity(textX);
                             transaction.AddNewlyCreatedDBObject(textX, true);
